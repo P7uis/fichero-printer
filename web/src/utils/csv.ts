@@ -16,6 +16,26 @@ export const normalizeCsvDelimiter = (delimiter?: string): string => {
   return Array.from(delimiter)[0] ?? CSV_DEFAULT_DELIMITER;
 };
 
+export const detectCsvDelimiter = (data: string): string | undefined => {
+  const firstLine = normalizeCsvData(data)
+    .split(/\r?\n/)
+    .find((line) => line.trim() !== "");
+
+  if (firstLine === undefined) {
+    return undefined;
+  }
+
+  const candidates = [",", ";", "\t"];
+  const best = candidates
+    .map((delimiter) => ({
+      delimiter,
+      count: firstLine.split(delimiter).length - 1,
+    }))
+    .sort((a, b) => b.count - a.count)[0];
+
+  return best !== undefined && best.count > 0 ? best.delimiter : undefined;
+};
+
 export const cleanCsvCell = (value: string): string => {
   const trimmed = value.trim();
   const first = trimmed[0];

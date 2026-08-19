@@ -6,7 +6,13 @@
   import { CSV_PLACEHOLDER } from "$/defaults";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
-  import { CSV_DEFAULT_DELIMITER, detectCsvHasHeader, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
+  import {
+    CSV_DEFAULT_DELIMITER,
+    detectCsvDelimiter,
+    detectCsvHasHeader,
+    normalizeCsvDelimiter,
+    parseCsvData,
+  } from "$/utils/csv";
 
   interface Props {
     enabled: boolean;
@@ -50,11 +56,23 @@
     onDataLoaded?.(result.columns, false);
   };
 
+  const updateCsvData = (value: string) => {
+    $csvData.data = value;
+    const detectedDelimiter = detectCsvDelimiter(value);
+
+    if (detectedDelimiter !== undefined) {
+      $csvData.delimiter = detectedDelimiter;
+    }
+
+    enabled = true;
+  };
+
   const loadCsvFile = async () => {
     try {
       const files = await FileUtils.pickFileAsync("csv", false);
       const file = files[0];
       $csvData.data = await file.text();
+      $csvData.delimiter = detectCsvDelimiter($csvData.data) ?? $csvData.delimiter;
       $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
       const result = parseCsvData(
         $csvData.data,
@@ -141,8 +159,8 @@
       <textarea
         class="dsv form-control my-3"
         placeholder={CSV_PLACEHOLDER}
-        bind:value={$csvData.data}
-        oninput={() => (enabled = true)}></textarea>
+        value={$csvData.data}
+        oninput={(e) => updateCsvData(e.currentTarget.value)}></textarea>
 
       <div class="placeholders pt-1">
         {$tr("params.csv.rowsfound")} <strong>{rows}</strong>
