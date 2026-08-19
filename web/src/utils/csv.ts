@@ -1,7 +1,7 @@
 import { dsvFormat, type DSVRowArray } from "d3-dsv";
 
 export const CSV_DEFAULT_DELIMITER = ",";
-const CSV_IDENTIFIER_RX = /^\$?\w+$/;
+const CSV_IDENTIFIER_RX = /^[A-Za-z_$][\w$]*$/;
 
 export const makeCsvColumnAliases = (columnCount: number): string[] =>
   Array.from({ length: columnCount }, (_, index) => `col${index + 1}`);

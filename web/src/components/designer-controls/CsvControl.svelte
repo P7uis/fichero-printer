@@ -33,6 +33,7 @@
   let placeholders = $state<string[]>([]);
   let rows = $state<number>(0);
   let pickedFileName = $state<string>("");
+  let hasHeaderManuallyChanged = $state(false);
 
   const parse = (csv: CsvParams) => {
     const result = parseCsvData(csv.data, csv.delimiter, csv.hasHeader ?? true, csv.oneItemPerCell ?? false);
@@ -52,6 +53,7 @@
 
   const setHasHeader = (value: boolean) => {
     $csvData.hasHeader = value;
+    hasHeaderManuallyChanged = true;
     enabled = true;
     const result = parseCsvData($csvData.data, $csvData.delimiter, value, $csvData.oneItemPerCell ?? false);
     onDataLoaded?.(result.columns, value);
@@ -72,6 +74,10 @@
       $csvData.delimiter = detectedDelimiter;
     }
 
+    if (!hasHeaderManuallyChanged) {
+      $csvData.hasHeader = detectCsvHasHeader(value, $csvData.delimiter);
+    }
+
     enabled = true;
   };
 
@@ -82,6 +88,7 @@
       $csvData.data = await file.text();
       $csvData.delimiter = detectCsvDelimiter($csvData.data) ?? $csvData.delimiter;
       $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
+      hasHeaderManuallyChanged = false;
       const result = parseCsvData(
         $csvData.data,
         $csvData.delimiter,
