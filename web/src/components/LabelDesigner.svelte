@@ -224,10 +224,12 @@
   const csvTextOptions = () => ({
       width: Math.max(2, labelProps.size.width - 12),
       fontAutoSize: true,
-      fontSize: Math.max(24, Math.floor(labelProps.size.height * 0.75)),
+      fontSize: Math.max(12, Math.floor(labelProps.size.height * 0.42)),
       textAlign: "center",
       originX: "left",
       originY: "center",
+      left: 6,
+      top: labelProps.size.height / 2,
     }) as const;
 
   const applyCsvTextTemplate = (text: string, target?: TextboxExt): TextboxExt => {
@@ -236,7 +238,6 @@
       ...csvTextOptions(),
       text,
     });
-    fabricCanvas!.centerObject(obj);
     fabricCanvas!.setActiveObject(obj);
     obj.setCoords();
     fabricCanvas!.requestRenderAll();
