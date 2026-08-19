@@ -3,7 +3,7 @@
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { type CsvParams } from "$/types";
   import { csvData } from "$/stores";
-  import { CSV_DEFAULT } from "$/defaults";
+  import { CSV_PLACEHOLDER } from "$/defaults";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
   import { CSV_DEFAULT_DELIMITER, detectCsvHasHeader, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
@@ -140,7 +140,7 @@
 
       <textarea
         class="dsv form-control my-3"
-        placeholder={CSV_DEFAULT}
+        placeholder={CSV_PLACEHOLDER}
         bind:value={$csvData.data}
         oninput={() => (enabled = true)}></textarea>
 
