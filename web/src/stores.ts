@@ -48,6 +48,7 @@ export const heartbeatFails = writable<number>(0);
 export const csvData = writablePersisted<CsvParams>("csv_params", CsvParamsSchema, {
   data: CSV_DEFAULT,
   delimiter: CSV_DEFAULT_DELIMITER,
+  hasHeader: true,
 });
 
 userFonts.subscribe(FileUtils.loadFonts);

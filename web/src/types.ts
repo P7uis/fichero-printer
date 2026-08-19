@@ -21,6 +21,7 @@ export type Range<T extends number> = number extends T ? number : _Range<T, []>;
 export const CsvParamsSchema = z.object({
   data: z.string(),
   delimiter: z.string().optional(),
+  hasHeader: z.boolean().optional(),
 });
 
 /** Not validated */

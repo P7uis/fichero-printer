@@ -546,7 +546,8 @@
       {printNow}
       {csvEnabled}
       csvData={$csvData.data}
-      csvDelimiter={$csvData.delimiter} />
+      csvDelimiter={$csvData.delimiter}
+      csvHasHeader={$csvData.hasHeader} />
   {/if}
 </div>
 

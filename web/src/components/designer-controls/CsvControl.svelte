@@ -19,7 +19,7 @@
   let pickedFileName = $state<string>("");
 
   const parse = (csv: CsvParams) => {
-    const result = parseCsvData(csv.data, csv.delimiter);
+    const result = parseCsvData(csv.data, csv.delimiter, csv.hasHeader ?? true);
     placeholders = result.columns;
     rows = result.length;
   };
@@ -31,6 +31,11 @@
 
   const setDelimiter = (value: string) => {
     $csvData.delimiter = value || CSV_DEFAULT_DELIMITER;
+    enabled = true;
+  };
+
+  const setHasHeader = (value: boolean) => {
+    $csvData.hasHeader = value;
     enabled = true;
   };
 
@@ -90,6 +95,17 @@
         <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter(",")}>Comma</button>
         <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter(";")}>Semicolon</button>
         <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter("\\t")}>Tab</button>
+      </div>
+
+      <div class="form-check form-switch mt-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          role="switch"
+          id="csv-has-header"
+          checked={$csvData.hasHeader ?? true}
+          onchange={(e) => setHasHeader(e.currentTarget.checked)} />
+        <label class="form-check-label" for="csv-has-header">First row contains column names</label>
       </div>
 
       <textarea class="dsv form-control my-3" bind:value={$csvData.data} oninput={() => (enabled = true)}></textarea>

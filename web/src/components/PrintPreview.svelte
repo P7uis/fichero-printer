@@ -32,12 +32,21 @@
     printNow?: boolean;
     csvData: string;
     csvDelimiter?: string;
+    csvHasHeader?: boolean;
     csvEnabled: boolean;
     show: boolean;
   }
 
-  let { labelProps, canvasCallback, printNow = false, csvData, csvDelimiter, csvEnabled, show = $bindable() }: Props =
-    $props();
+  let {
+    labelProps,
+    canvasCallback,
+    printNow = false,
+    csvData,
+    csvDelimiter,
+    csvHasHeader,
+    csvEnabled,
+    show = $bindable(),
+  }: Props = $props();
 
   let previewCanvas: HTMLCanvasElement;
   let printState = $state<"idle" | "sending" | "printing">("idle");
@@ -388,7 +397,7 @@
 
   onMount(async () => {
     if (csvEnabled) {
-      const parseResult = parseCsvData(csvData, csvDelimiter);
+      const parseResult = parseCsvData(csvData, csvDelimiter, csvHasHeader ?? true);
       const spread: DSVRowArray<string> = Object.assign([], { columns: parseResult.columns });
 
       for (let row of parseResult) {
