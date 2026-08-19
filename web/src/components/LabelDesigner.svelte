@@ -239,12 +239,17 @@
       text,
     });
     fabricCanvas!.setActiveObject(obj);
+    selectedObject = obj;
+    selectedCount = 1;
+    editRevision++;
     obj.setCoords();
     fabricCanvas!.requestRenderAll();
     return obj;
   };
 
   const defaultTextValues = () => new Set(["", "Text", $tr("editor.default_text")]);
+
+  const isDefaultText = (text?: string): boolean => defaultTextValues().has((text ?? "").trim());
 
   const csvTemplateLines = (text?: string): string[] => {
     const defaultValues = defaultTextValues();
@@ -254,21 +259,36 @@
       .filter((line) => line !== "" && !defaultValues.has(line));
   };
 
-  const activeCsvPlaceholders = () => {
-    if (!(selectedObject instanceof TextboxExt)) {
+  const csvTargetTextbox = (): TextboxExt | undefined => {
+    const active = fabricCanvas?.getActiveObject();
+    if (active instanceof TextboxExt) {
+      return active;
+    }
+
+    if (selectedObject instanceof TextboxExt) {
+      return selectedObject;
+    }
+
+    const textboxes = fabricCanvas?.getObjects().filter((obj): obj is TextboxExt => obj instanceof TextboxExt) ?? [];
+    return textboxes.find((obj) => isDefaultText(obj.text)) ?? (textboxes.length === 1 ? textboxes[0] : undefined);
+  };
+
+  const activeCsvPlaceholders = (_revision: number) => {
+    const target = csvTargetTextbox();
+    if (target === undefined) {
       return [];
     }
 
-    return csvTemplateLines(selectedObject.text)
+    return csvTemplateLines(target.text)
       .map((line) => line.match(/^\{\s*(\w+)\s*\}$/)?.[1])
       .filter((placeholder): placeholder is string => placeholder !== undefined);
   };
 
   const onCsvPlaceholderPicked = (name: string) => {
     const placeholder = `{${name}}`;
-    const active = fabricCanvas!.getActiveObject();
+    const active = csvTargetTextbox();
 
-    if (active instanceof TextboxExt) {
+    if (active !== undefined) {
       const lines = csvTemplateLines(active.text);
       const nextLines = lines.includes(placeholder)
         ? lines.filter((line) => line !== placeholder)
@@ -278,6 +298,9 @@
       } else {
         active.set({ text: "" });
         fabricCanvas!.setActiveObject(active);
+        selectedObject = active;
+        selectedCount = 1;
+        editRevision++;
         active.setCoords();
         fabricCanvas!.requestRenderAll();
       }
@@ -295,7 +318,7 @@
 
     const objects = fabricCanvas!.getObjects();
     const defaultText = objects.length === 1 && objects[0] instanceof TextboxExt ? objects[0] : undefined;
-    if (defaultText === undefined || !["", "Text", $tr("editor.default_text")].includes(defaultText.text ?? "")) {
+    if (defaultText === undefined || !isDefaultText(defaultText.text)) {
       return;
     }
 
@@ -554,7 +577,7 @@
           bind:enabled={csvEnabled}
           onPlaceholderPicked={onCsvPlaceholderPicked}
           onDataLoaded={onCsvDataLoaded}
-          activePlaceholders={activeCsvPlaceholders()} />
+          activePlaceholders={activeCsvPlaceholders(editRevision)} />
 
         <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
         <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
