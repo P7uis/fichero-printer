@@ -319,8 +319,43 @@
     undo.push(fabricCanvas!, labelProps);
   };
 
-  const onCsvDataLoaded = (placeholders: string[], hasHeader: boolean) => {
-    if (hasHeader || placeholders.length === 0) {
+  const onCsvDataLoaded = (placeholders: string[], hasHeader: boolean, replaceCurrentTemplate: boolean = false) => {
+    if (placeholders.length === 0) {
+      return;
+    }
+
+    const target = csvTargetTextbox();
+    const nextTemplate = placeholders
+      .slice(0, CSV_MAX_STICKER_ROWS)
+      .map((placeholder) => `{${placeholder}}`)
+      .join("\n");
+
+    if (replaceCurrentTemplate) {
+      if (target !== undefined && target.text === nextTemplate) {
+        return;
+      }
+
+      applyCsvTextTemplate(nextTemplate, target);
+      undo.push(fabricCanvas!, labelProps);
+      return;
+    }
+
+    if (target !== undefined) {
+      const validPlaceholders = new Set(placeholders);
+      const lines = csvTemplateLines(target.text);
+      const nextLines = lines.filter((line) => {
+        const placeholderName = line.match(/^\{\s*(\w+)\s*\}$/)?.[1];
+        return placeholderName === undefined || validPlaceholders.has(placeholderName);
+      });
+
+      if (nextLines.length !== lines.length) {
+        applyCsvTextTemplate(nextLines.join("\n"), target);
+        undo.push(fabricCanvas!, labelProps);
+        return;
+      }
+    }
+
+    if (hasHeader) {
       return;
     }
 
@@ -332,7 +367,7 @@
 
     const rows = makeCsvColumnAliases(CSV_MAX_STICKER_ROWS).filter((placeholder) => placeholders.includes(placeholder));
 
-    applyCsvTextTemplate(rows.slice(0, CSV_MAX_STICKER_ROWS).map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
+    applyCsvTextTemplate(rows.map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
     undo.push(fabricCanvas!, labelProps);
   };
 

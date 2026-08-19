@@ -17,7 +17,7 @@
   interface Props {
     enabled: boolean;
     onPlaceholderPicked: (name: string) => void;
-    onDataLoaded?: (placeholders: string[], hasHeader: boolean) => void;
+    onDataLoaded?: (placeholders: string[], hasHeader: boolean, replaceCurrentTemplate?: boolean) => void;
     activePlaceholders?: string[];
     maxActivePlaceholders?: number;
   }
@@ -41,6 +41,16 @@
     rows = result.length;
   };
 
+  const refreshData = (replaceCurrentTemplate: boolean = false) => {
+    const result = parseCsvData(
+      $csvData.data,
+      $csvData.delimiter,
+      $csvData.hasHeader ?? true,
+      $csvData.oneItemPerCell ?? false,
+    );
+    onDataLoaded?.(result.columns, $csvData.hasHeader ?? true, replaceCurrentTemplate);
+  };
+
   const delimiterInputValue = () => {
     const delimiter = normalizeCsvDelimiter($csvData.delimiter);
     return delimiter === "\t" ? "\\t" : delimiter;
@@ -49,21 +59,20 @@
   const setDelimiter = (value: string) => {
     $csvData.delimiter = value || CSV_DEFAULT_DELIMITER;
     enabled = true;
+    refreshData($csvData.oneItemPerCell ?? false);
   };
 
   const setHasHeader = (value: boolean) => {
     $csvData.hasHeader = value;
     hasHeaderManuallyChanged = true;
     enabled = true;
-    const result = parseCsvData($csvData.data, $csvData.delimiter, value, $csvData.oneItemPerCell ?? false);
-    onDataLoaded?.(result.columns, value);
+    refreshData($csvData.oneItemPerCell ?? false);
   };
 
   const setOneItemPerCell = (value: boolean) => {
     $csvData.oneItemPerCell = value;
     enabled = true;
-    const result = parseCsvData($csvData.data, $csvData.delimiter, $csvData.hasHeader ?? true, value);
-    onDataLoaded?.(result.columns, false);
+    refreshData(value);
   };
 
   const updateCsvData = (value: string) => {
@@ -79,6 +88,7 @@
     }
 
     enabled = true;
+    refreshData($csvData.oneItemPerCell ?? false);
   };
 
   const loadCsvFile = async () => {
@@ -89,15 +99,9 @@
       $csvData.delimiter = detectCsvDelimiter($csvData.data) ?? $csvData.delimiter;
       $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
       hasHeaderManuallyChanged = false;
-      const result = parseCsvData(
-        $csvData.data,
-        $csvData.delimiter,
-        $csvData.hasHeader,
-        $csvData.oneItemPerCell ?? false,
-      );
       pickedFileName = file.name;
       enabled = true;
-      onDataLoaded?.(result.columns, $csvData.hasHeader);
+      refreshData($csvData.oneItemPerCell ?? false);
     } catch (e) {
       Toasts.error(e);
     }
