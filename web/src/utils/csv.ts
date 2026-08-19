@@ -1,7 +1,7 @@
 import { dsvFormat, type DSVRowArray } from "d3-dsv";
 
 export const CSV_DEFAULT_DELIMITER = ",";
-export const CSV_HEADERLESS_ALIASES = ["row1", "row2", "row3", "row4"];
+export const CSV_HEADERLESS_ALIASES = ["col1", "col2", "col3", "col4"];
 const CSV_IDENTIFIER_RX = /^\$?\w+$/;
 
 export const normalizeCsvDelimiter = (delimiter?: string): string => {
@@ -60,10 +60,10 @@ export const parseCsvData = (
       .parseRows(normalizedData, (row) => row.map(cleanCsvCell))
       .flat()
       .filter((cell) => cell !== "");
-    const normalized: DSVRowArray<string> = Object.assign([], { columns: ["row1"] });
+    const normalized: DSVRowArray<string> = Object.assign([], { columns: ["col1"] });
 
     for (const cell of rows) {
-      normalized.push({ row1: cell });
+      normalized.push({ col1: cell });
     }
 
     return normalized;

@@ -275,7 +275,7 @@
       return;
     }
 
-    const rows = ["row1", "row2", "row3", "row4"].filter((placeholder) => placeholders.includes(placeholder));
+    const rows = ["col1", "col2", "col3", "col4"].filter((placeholder) => placeholders.includes(placeholder));
 
     applyCsvTextTemplate(rows.slice(0, 4).map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
     undo.push(fabricCanvas!, labelProps);
