@@ -244,19 +244,43 @@
     return obj;
   };
 
+  const defaultTextValues = () => new Set(["", "Text", $tr("editor.default_text")]);
+
+  const csvTemplateLines = (text?: string): string[] => {
+    const defaultValues = defaultTextValues();
+    return (text ?? "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line !== "" && !defaultValues.has(line));
+  };
+
+  const activeCsvPlaceholders = () => {
+    if (!(selectedObject instanceof TextboxExt)) {
+      return [];
+    }
+
+    return csvTemplateLines(selectedObject.text)
+      .map((line) => line.match(/^\{\s*(\w+)\s*\}$/)?.[1])
+      .filter((placeholder): placeholder is string => placeholder !== undefined);
+  };
+
   const onCsvPlaceholderPicked = (name: string) => {
     const placeholder = `{${name}}`;
     const active = fabricCanvas!.getActiveObject();
 
     if (active instanceof TextboxExt) {
-      const currentText = active.text ?? "";
-      const nextText =
-        currentText === $tr("editor.default_text") || currentText === "Text" || currentText === ""
-          ? placeholder
-          : currentText.includes(placeholder)
-            ? currentText
-            : `${currentText}\n${placeholder}`;
-      applyCsvTextTemplate(nextText, active);
+      const lines = csvTemplateLines(active.text);
+      const nextLines = lines.includes(placeholder)
+        ? lines.filter((line) => line !== placeholder)
+        : [...lines, placeholder];
+      if (nextLines.length > 0) {
+        applyCsvTextTemplate(nextLines.join("\n"), active);
+      } else {
+        active.set({ text: "" });
+        fabricCanvas!.setActiveObject(active);
+        active.setCoords();
+        fabricCanvas!.requestRenderAll();
+      }
     } else {
       applyCsvTextTemplate(placeholder);
     }
@@ -529,7 +553,8 @@
         <CsvControl
           bind:enabled={csvEnabled}
           onPlaceholderPicked={onCsvPlaceholderPicked}
-          onDataLoaded={onCsvDataLoaded} />
+          onDataLoaded={onCsvDataLoaded}
+          activePlaceholders={activeCsvPlaceholders()} />
 
         <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
         <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />

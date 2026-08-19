@@ -18,9 +18,10 @@
     enabled: boolean;
     onPlaceholderPicked: (name: string) => void;
     onDataLoaded?: (placeholders: string[], hasHeader: boolean) => void;
+    activePlaceholders?: string[];
   }
 
-  let { enabled = $bindable(), onPlaceholderPicked, onDataLoaded }: Props = $props();
+  let { enabled = $bindable(), onPlaceholderPicked, onDataLoaded, activePlaceholders = [] }: Props = $props();
 
   let placeholders = $state<string[]>([]);
   let rows = $state<number>(0);
@@ -168,7 +169,10 @@
       <div class="placeholders pt-1">
         {$tr("params.csv.placeholders")}
         {#each placeholders as p (p)}
-          <button class="btn btn-sm btn-outline-info px-1 py-0" onclick={() => onPlaceholderPicked(p)}
+          <button
+            class="btn btn-sm btn-{activePlaceholders.includes(p) ? 'info' : 'outline-info'} px-1 py-0"
+            aria-pressed={activePlaceholders.includes(p)}
+            onclick={() => onPlaceholderPicked(p)}
             >{`{${p}}`}
           </button>
         {/each}
