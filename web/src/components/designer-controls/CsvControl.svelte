@@ -19,9 +19,16 @@
     onPlaceholderPicked: (name: string) => void;
     onDataLoaded?: (placeholders: string[], hasHeader: boolean) => void;
     activePlaceholders?: string[];
+    maxActivePlaceholders?: number;
   }
 
-  let { enabled = $bindable(), onPlaceholderPicked, onDataLoaded, activePlaceholders = [] }: Props = $props();
+  let {
+    enabled = $bindable(),
+    onPlaceholderPicked,
+    onDataLoaded,
+    activePlaceholders = [],
+    maxActivePlaceholders = 5,
+  }: Props = $props();
 
   let placeholders = $state<string[]>([]);
   let rows = $state<number>(0);
@@ -169,9 +176,13 @@
       <div class="placeholders pt-1">
         {$tr("params.csv.placeholders")}
         {#each placeholders as p (p)}
+          {@const active = activePlaceholders.includes(p)}
+          {@const disabled = !active && activePlaceholders.length >= maxActivePlaceholders}
           <button
-            class="btn btn-sm btn-{activePlaceholders.includes(p) ? 'info' : 'outline-info'} placeholder-toggle px-1 py-0"
-            aria-pressed={activePlaceholders.includes(p)}
+            class="btn btn-sm btn-{active ? 'info' : 'outline-info'} placeholder-toggle px-1 py-0"
+            aria-pressed={active}
+            {disabled}
+            title={disabled ? `Remove another column first. Stickers can show up to ${maxActivePlaceholders} rows.` : ""}
             onclick={() => onPlaceholderPicked(p)}
             >{`{${p}}`}
           </button>

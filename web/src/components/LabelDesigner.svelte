@@ -37,6 +37,9 @@
   import { CustomCanvas } from "$/fabric-object/custom_canvas";
   import VectorParamsControls from "$/components/designer-controls/VectorParamsControls.svelte";
   import { CanvasUtils } from "$/utils/canvas_utils";
+  import { makeCsvColumnAliases } from "$/utils/csv";
+
+  const CSV_MAX_STICKER_ROWS = 5;
 
   let htmlCanvas: HTMLCanvasElement;
 
@@ -290,6 +293,11 @@
 
     if (active !== undefined) {
       const lines = csvTemplateLines(active.text);
+      if (!lines.includes(placeholder) && lines.length >= CSV_MAX_STICKER_ROWS) {
+        Toasts.message(`Remove another CSV column first. Stickers can show up to ${CSV_MAX_STICKER_ROWS} rows.`);
+        return;
+      }
+
       const nextLines = lines.includes(placeholder)
         ? lines.filter((line) => line !== placeholder)
         : [...lines, placeholder];
@@ -322,9 +330,9 @@
       return;
     }
 
-    const rows = ["col1", "col2", "col3", "col4"].filter((placeholder) => placeholders.includes(placeholder));
+    const rows = makeCsvColumnAliases(CSV_MAX_STICKER_ROWS).filter((placeholder) => placeholders.includes(placeholder));
 
-    applyCsvTextTemplate(rows.slice(0, 4).map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
+    applyCsvTextTemplate(rows.slice(0, CSV_MAX_STICKER_ROWS).map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
     undo.push(fabricCanvas!, labelProps);
   };
 
@@ -577,7 +585,8 @@
           bind:enabled={csvEnabled}
           onPlaceholderPicked={onCsvPlaceholderPicked}
           onDataLoaded={onCsvDataLoaded}
-          activePlaceholders={activeCsvPlaceholders(editRevision)} />
+          activePlaceholders={activeCsvPlaceholders(editRevision)}
+          maxActivePlaceholders={CSV_MAX_STICKER_ROWS} />
 
         <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
         <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />
