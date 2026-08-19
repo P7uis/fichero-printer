@@ -85,4 +85,4 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   iconListMode: "both"
 };
 
-export const CSV_DEFAULT = "Name example,Class example,Line 3 example,Line 4 example\nJane Doe,1Ga,Group A,Locker 12";
+export const CSV_DEFAULT = "Row 1 example,Row 2 example,Row 3 example,Row 4 example\nAnother row 1,Another row 2,Another row 3,Another row 4";
