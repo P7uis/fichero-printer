@@ -33,7 +33,9 @@ export const canvasPreprocess = (canvas: fabric.Canvas, variables?: { [key: stri
 
       if (obj instanceof TextboxExt && obj.fontAutoSize) {
         const bounds = obj.getBoundingRect();
-        const maxHeight = Math.max(2, canvas.height - bounds.top);
+        const topSpace = Math.max(0, bounds.top);
+        const bottomSpace = Math.max(0, canvas.height - bounds.top);
+        const maxHeight = Math.max(2, obj.originY === "center" ? Math.min(topSpace, bottomSpace) * 2 : bottomSpace);
         obj.setAndShrinkText(text, obj.width, undefined, maxHeight);
       } else {
         obj.set({ text });

@@ -19,6 +19,7 @@
   import { LocalStoragePersistence } from "$/utils/persistence";
   import { Toasts } from "$/utils/toasts";
   import { UndoRedo, type UndoState } from "$/utils/undo_redo";
+  import { TextboxExt } from "$/fabric-object/textbox-ext";
   import BarcodeParamsPanel from "$/components/designer-controls/BarcodeParamsControls.svelte";
   import CsvControl from "$/components/designer-controls/CsvControl.svelte";
   import GenericObjectParamsControls from "$/components/designer-controls/GenericObjectParamsControls.svelte";
@@ -220,16 +221,60 @@
     return fabricCanvas!.toJSON();
   };
 
-  const onCsvPlaceholderPicked = (name: string) => {
-    const obj = LabelDesignerObjectHelper.addText(fabricCanvas!, `{${name}}`, {
+  const csvTextOptions = () => ({
       width: Math.max(2, labelProps.size.width - 12),
       fontAutoSize: true,
       fontSize: Math.max(24, Math.floor(labelProps.size.height * 0.75)),
       textAlign: "center",
       originX: "left",
       originY: "center",
+    }) as const;
+
+  const applyCsvTextTemplate = (text: string, target?: TextboxExt): TextboxExt => {
+    const obj = target ?? LabelDesignerObjectHelper.addText(fabricCanvas!, text, csvTextOptions());
+    obj.set({
+      ...csvTextOptions(),
+      text,
     });
+    fabricCanvas!.centerObject(obj);
     fabricCanvas!.setActiveObject(obj);
+    obj.setCoords();
+    fabricCanvas!.requestRenderAll();
+    return obj;
+  };
+
+  const onCsvPlaceholderPicked = (name: string) => {
+    const placeholder = `{${name}}`;
+    const active = fabricCanvas!.getActiveObject();
+
+    if (active instanceof TextboxExt) {
+      const currentText = active.text ?? "";
+      const nextText =
+        currentText === $tr("editor.default_text") || currentText === "Text" || currentText === ""
+          ? placeholder
+          : currentText.includes(placeholder)
+            ? currentText
+            : `${currentText}\n${placeholder}`;
+      applyCsvTextTemplate(nextText, active);
+    } else {
+      applyCsvTextTemplate(placeholder);
+    }
+
+    undo.push(fabricCanvas!, labelProps);
+  };
+
+  const onCsvDataLoaded = (placeholders: string[], hasHeader: boolean) => {
+    if (hasHeader || !placeholders.includes("name") || !placeholders.includes("class")) {
+      return;
+    }
+
+    const objects = fabricCanvas!.getObjects();
+    const defaultText = objects.length === 1 && objects[0] instanceof TextboxExt ? objects[0] : undefined;
+    if (defaultText === undefined || !["", "Text", $tr("editor.default_text")].includes(defaultText.text ?? "")) {
+      return;
+    }
+
+    applyCsvTextTemplate("{name}\n{class}", defaultText);
     undo.push(fabricCanvas!, labelProps);
   };
 
@@ -478,7 +523,10 @@
           <MdIcon icon="redo" />
         </button>
 
-        <CsvControl bind:enabled={csvEnabled} onPlaceholderPicked={onCsvPlaceholderPicked} />
+        <CsvControl
+          bind:enabled={csvEnabled}
+          onPlaceholderPicked={onCsvPlaceholderPicked}
+          onDataLoaded={onCsvDataLoaded} />
 
         <IconPicker onSubmit={onIconPicked} onSubmitSvg={onSvgIconPicked} />
         <ObjectPicker onSubmit={onObjectPicked} {labelProps} {zplImageReady} />

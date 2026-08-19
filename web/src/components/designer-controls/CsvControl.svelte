@@ -10,9 +10,10 @@
   interface Props {
     enabled: boolean;
     onPlaceholderPicked: (name: string) => void;
+    onDataLoaded?: (placeholders: string[], hasHeader: boolean) => void;
   }
 
-  let { enabled = $bindable(), onPlaceholderPicked }: Props = $props();
+  let { enabled = $bindable(), onPlaceholderPicked, onDataLoaded }: Props = $props();
 
   let placeholders = $state<string[]>([]);
   let rows = $state<number>(0);
@@ -37,6 +38,8 @@
   const setHasHeader = (value: boolean) => {
     $csvData.hasHeader = value;
     enabled = true;
+    const result = parseCsvData($csvData.data, $csvData.delimiter, value);
+    onDataLoaded?.(result.columns, value);
   };
 
   const loadCsvFile = async () => {
@@ -45,8 +48,10 @@
       const file = files[0];
       $csvData.data = await file.text();
       $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
+      const result = parseCsvData($csvData.data, $csvData.delimiter, $csvData.hasHeader);
       pickedFileName = file.name;
       enabled = true;
+      onDataLoaded?.(result.columns, $csvData.hasHeader);
     } catch (e) {
       Toasts.error(e);
     }

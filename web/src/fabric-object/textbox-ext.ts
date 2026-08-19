@@ -43,7 +43,7 @@ export class TextboxExt<
 
   /** Set text as large as possible, bounded by the current font size and box size */
   setAndFitText(text: string, maxWidth: number, maxHeight: number, maxLines?: number, maxFontSize?: number) {
-    const linesLimit = maxLines ?? this._splitTextIntoLines(this.text).lines.length;
+    const linesLimit = maxLines ?? text.split(/\r?\n/).length;
     const upperFontSize = Math.max(2, Math.floor(maxFontSize ?? this.fontSize));
     let bestFontSize = 2;
 
