@@ -737,10 +737,10 @@
   .batch-preview-list {
     display: grid;
     gap: 0.5rem;
-    justify-content: center;
+    justify-content: stretch;
   }
   .batch-preview-list.grid {
-    grid-template-columns: repeat(auto-fill, minmax(96px, max-content));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
   }
   .batch-preview-list.row {
     display: flex;
@@ -753,23 +753,37 @@
     flex-direction: column;
     align-items: center;
   }
+  .batch-preview-list.row .batch-preview-item {
+    flex: 0 0 12rem;
+  }
+  .batch-preview-list.column .batch-preview-item {
+    width: min(100%, 18rem);
+  }
   .batch-preview-item {
     border: 1px solid var(--border-standard);
     background: var(--surface-1);
     color: inherit;
     display: grid;
     gap: 0.25rem;
+    grid-template-rows: minmax(0, auto) auto;
+    min-width: 0;
+    overflow: hidden;
     padding: 0.35rem;
     place-items: center;
+    width: 100%;
   }
   .batch-preview-item.active {
     border-color: var(--bs-primary);
     box-shadow: 0 0 0 0.15rem rgba(var(--bs-primary-rgb), 0.2);
   }
   .batch-preview-item img {
+    display: block;
     image-rendering: pixelated;
-    max-height: 96px;
-    max-width: 140px;
+    height: auto;
+    max-height: 7rem;
+    max-width: 100%;
+    object-fit: contain;
+    width: 100%;
   }
   .batch-preview-item span {
     font-size: 0.75rem;
