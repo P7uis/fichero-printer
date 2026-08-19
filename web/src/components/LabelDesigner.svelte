@@ -275,7 +275,11 @@
       return;
     }
 
-    applyCsvTextTemplate(placeholders.includes("class") ? "{name}\n{class}" : "{name}", defaultText);
+    const preferredRows = ["name", "class", "row3", "row4"].filter((placeholder) => placeholders.includes(placeholder));
+    const genericRows = ["col1", "col2", "col3", "col4"].filter((placeholder) => placeholders.includes(placeholder));
+    const rows = preferredRows.length > 0 ? preferredRows : genericRows;
+
+    applyCsvTextTemplate(rows.slice(0, 4).map((placeholder) => `{${placeholder}}`).join("\n"), defaultText);
     undo.push(fabricCanvas!, labelProps);
   };
 

@@ -1,7 +1,7 @@
 import { dsvFormat, type DSVRowArray } from "d3-dsv";
 
 export const CSV_DEFAULT_DELIMITER = ",";
-export const CSV_HEADERLESS_ALIASES = ["name", "class"];
+export const CSV_HEADERLESS_ALIASES = ["name", "class", "row3", "row4"];
 const CSV_IDENTIFIER_RX = /^\$?\w+$/;
 
 export const normalizeCsvDelimiter = (delimiter?: string): string => {
