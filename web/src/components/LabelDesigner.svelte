@@ -265,7 +265,7 @@
   };
 
   const onCsvDataLoaded = (placeholders: string[], hasHeader: boolean) => {
-    if (hasHeader || !placeholders.includes("name")) {
+    if (hasHeader || placeholders.length === 0) {
       return;
     }
 
@@ -275,7 +275,7 @@
       return;
     }
 
-    const preferredRows = ["name", "class", "row3", "row4"].filter((placeholder) => placeholders.includes(placeholder));
+    const preferredRows = ["row1", "row2", "row3", "row4"].filter((placeholder) => placeholders.includes(placeholder));
     const genericRows = ["col1", "col2", "col3", "col4"].filter((placeholder) => placeholders.includes(placeholder));
     const rows = preferredRows.length > 0 ? preferredRows : genericRows;
 
