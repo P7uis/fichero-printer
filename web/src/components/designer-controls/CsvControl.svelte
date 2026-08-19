@@ -170,12 +170,10 @@
         {$tr("params.csv.placeholders")}
         {#each placeholders as p (p)}
           <button
-            class="btn btn-sm btn-outline-info placeholder-toggle {activePlaceholders.includes(p) ? 'active' : ''} px-1 py-0"
+            class="btn btn-sm btn-{activePlaceholders.includes(p) ? 'info' : 'outline-info'} placeholder-toggle px-1 py-0"
             aria-pressed={activePlaceholders.includes(p)}
             onclick={() => onPlaceholderPicked(p)}
-            >{#if activePlaceholders.includes(p)}
-              <MdIcon icon="check" />
-            {/if}{`{${p}}`}
+            >{`{${p}}`}
           </button>
         {/each}
       </div>
@@ -195,15 +193,8 @@
   .placeholder-toggle {
     align-items: center;
     display: inline-flex;
-    gap: 0.15rem;
+    justify-content: center;
     line-height: 1.2;
-  }
-  .placeholder-toggle.active {
-    background: rgba(var(--bs-info-rgb), 0.14);
-    box-shadow: inset 0 0 0 1px var(--bs-info);
-  }
-  .placeholder-toggle :global(.mdi) {
-    font-size: 0.9em;
-    line-height: 1;
+    min-height: 1.5rem;
   }
 </style>
