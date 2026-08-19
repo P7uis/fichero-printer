@@ -17,24 +17,27 @@
   import ParamLockButton from "$/components/basic/ParamLockButton.svelte";
   import { tr, type TranslationKey } from "$/utils/i18n";
   import { canvasPreprocess } from "$/utils/canvas_preprocess";
-  import { type DSVRowArray, csvParse } from "d3-dsv";
+  import { type DSVRowArray } from "d3-dsv";
   import { LocalStoragePersistence } from "$/utils/persistence";
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { Toasts } from "$/utils/toasts";
   import { CustomCanvas } from "$/fabric-object/custom_canvas";
   import { FileUtils } from "$/utils/file_utils";
   import AppModal from "$/components/basic/AppModal.svelte";
+  import { parseCsvData } from "$/utils/csv";
 
   interface Props {
     labelProps: LabelProps;
     canvasCallback: () => FabricJson;
     printNow?: boolean;
     csvData: string;
+    csvDelimiter?: string;
     csvEnabled: boolean;
     show: boolean;
   }
 
-  let { labelProps, canvasCallback, printNow = false, csvData, csvEnabled, show = $bindable() }: Props = $props();
+  let { labelProps, canvasCallback, printNow = false, csvData, csvDelimiter, csvEnabled, show = $bindable() }: Props =
+    $props();
 
   let previewCanvas: HTMLCanvasElement;
   let printState = $state<"idle" | "sending" | "printing">("idle");
@@ -385,7 +388,7 @@
 
   onMount(async () => {
     if (csvEnabled) {
-      const parseResult = csvParse(csvData);
+      const parseResult = parseCsvData(csvData, csvDelimiter);
       const spread: DSVRowArray<string> = Object.assign([], { columns: parseResult.columns });
 
       for (let row of parseResult) {

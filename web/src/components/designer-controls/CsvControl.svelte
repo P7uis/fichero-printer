@@ -1,11 +1,11 @@
 <script lang="ts">
   import { tr } from "$/utils/i18n";
-  import { csvParse } from "d3-dsv";
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { type CsvParams } from "$/types";
   import { csvData } from "$/stores";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
+  import { CSV_DEFAULT_DELIMITER, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
 
   interface Props {
     enabled: boolean;
@@ -19,9 +19,19 @@
   let pickedFileName = $state<string>("");
 
   const parse = (csv: CsvParams) => {
-    const result = csvParse(csv.data);
+    const result = parseCsvData(csv.data, csv.delimiter);
     placeholders = result.columns;
     rows = result.length;
+  };
+
+  const delimiterInputValue = () => {
+    const delimiter = normalizeCsvDelimiter($csvData.delimiter);
+    return delimiter === "\t" ? "\\t" : delimiter;
+  };
+
+  const setDelimiter = (value: string) => {
+    $csvData.delimiter = value || CSV_DEFAULT_DELIMITER;
+    enabled = true;
   };
 
   const loadCsvFile = async () => {
@@ -68,6 +78,19 @@
       {#if pickedFileName}
         <div class="small text-body-secondary mt-1">{pickedFileName}</div>
       {/if}
+
+      <div class="input-group input-group-sm mt-3">
+        <span class="input-group-text">Separator</span>
+        <input
+          class="form-control"
+          maxlength="3"
+          value={delimiterInputValue()}
+          oninput={(e) => setDelimiter(e.currentTarget.value)}
+          placeholder="," />
+        <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter(",")}>Comma</button>
+        <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter(";")}>Semicolon</button>
+        <button class="btn btn-outline-secondary" type="button" onclick={() => setDelimiter("\\t")}>Tab</button>
+      </div>
 
       <textarea class="dsv form-control my-3" bind:value={$csvData.data} oninput={() => (enabled = true)}></textarea>
 

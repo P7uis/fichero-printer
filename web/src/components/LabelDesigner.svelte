@@ -545,7 +545,8 @@
       {labelProps}
       {printNow}
       {csvEnabled}
-      csvData={$csvData.data} />
+      csvData={$csvData.data}
+      csvDelimiter={$csvData.delimiter} />
   {/if}
 </div>
 
