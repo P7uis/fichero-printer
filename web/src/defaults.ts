@@ -86,4 +86,4 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
 };
 
 export const CSV_DEFAULT = "";
-export const CSV_PLACEHOLDER = "col1,col2,col3,col4\nA,B,C,D";
+export const CSV_PLACEHOLDER = "col1,col2,col3,col4\nvalue 1,value 2,value 3,value 4";
