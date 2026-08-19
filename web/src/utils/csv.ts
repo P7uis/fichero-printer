@@ -2,7 +2,6 @@ import { dsvFormat, type DSVRowArray } from "d3-dsv";
 
 export const CSV_DEFAULT_DELIMITER = ",";
 export const CSV_HEADERLESS_ALIASES = ["row1", "row2", "row3", "row4"];
-const CSV_COMPAT_HEADERLESS_ALIASES = ["name", "class"];
 const CSV_IDENTIFIER_RX = /^\$?\w+$/;
 
 export const normalizeCsvDelimiter = (delimiter?: string): string => {
@@ -64,7 +63,7 @@ export const parseCsvData = (
     const normalized: DSVRowArray<string> = Object.assign([], { columns: ["row1"] });
 
     for (const cell of rows) {
-      normalized.push({ col1: cell, name: cell, row1: cell });
+      normalized.push({ row1: cell });
     }
 
     return normalized;
@@ -73,23 +72,13 @@ export const parseCsvData = (
   if (!hasHeader) {
     const rows = parser.parseRows(normalizedData, (row) => row.map(cleanCsvCell)).filter((row) => row.length > 0);
     const columnCount = Math.max(0, ...rows.map((row) => row.length));
-    const columns = Array.from({ length: columnCount }, (_, index) => `col${index + 1}`);
     const aliases = CSV_HEADERLESS_ALIASES.slice(0, columnCount);
-    const compatAliases = CSV_COMPAT_HEADERLESS_ALIASES.slice(0, columnCount);
     const normalized: DSVRowArray<string> = Object.assign([], { columns: aliases });
 
     for (const row of rows) {
       const cleanRow: Record<string, string> = {};
 
-      columns.forEach((column, index) => {
-        cleanRow[column] = row[index] ?? "";
-      });
-
       aliases.forEach((alias, index) => {
-        cleanRow[alias] = row[index] ?? "";
-      });
-
-      compatAliases.forEach((alias, index) => {
         cleanRow[alias] = row[index] ?? "";
       });
 
