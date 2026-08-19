@@ -3,6 +3,7 @@
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { type CsvParams } from "$/types";
   import { csvData } from "$/stores";
+  import { CSV_DEFAULT } from "$/defaults";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
   import { CSV_DEFAULT_DELIMITER, detectCsvHasHeader, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
@@ -137,7 +138,11 @@
         <label class="form-check-label" for="csv-one-item-per-cell">Separated values are individual labels</label>
       </div>
 
-      <textarea class="dsv form-control my-3" bind:value={$csvData.data} oninput={() => (enabled = true)}></textarea>
+      <textarea
+        class="dsv form-control my-3"
+        placeholder={CSV_DEFAULT}
+        bind:value={$csvData.data}
+        oninput={() => (enabled = true)}></textarea>
 
       <div class="placeholders pt-1">
         {$tr("params.csv.rowsfound")} <strong>{rows}</strong>
