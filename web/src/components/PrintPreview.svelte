@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { derived } from "svelte/store";
+  import * as fabric from "fabric";
   import { appConfig, connectionState, printerClient, printerMeta, refreshRfidInfo } from "$/stores";
   import { copyImageData, threshold, atkinson, invert, bayer } from "$/utils/post_process";
   import {
@@ -25,6 +26,7 @@
   import { FileUtils } from "$/utils/file_utils";
   import AppModal from "$/components/basic/AppModal.svelte";
   import { parseCsvData } from "$/utils/csv";
+  import { TextboxExt } from "$/fabric-object/textbox-ext";
 
   interface Props {
     labelProps: LabelProps;
@@ -68,6 +70,24 @@
   let error = $state<string>("");
   let detectedPrintTaskName: PrintTaskName | undefined = $printerClient?.getPrintTaskType();
   let csvParsed: DSVRowArray<string>;
+
+  const defaultTextValues = () => new Set(["", "Text", $tr("editor.default_text")]);
+
+  const applyCsvSingleValueFallback = (canvas: fabric.Canvas) => {
+    if (!csvEnabled || !csvOneItemPerCell || csvParsed.length === 0) {
+      return;
+    }
+
+    const textObjects = canvas.getObjects().filter((obj): obj is fabric.IText => obj instanceof fabric.IText);
+    if (textObjects.length !== 1 || !defaultTextValues().has((textObjects[0].text ?? "").trim())) {
+      return;
+    }
+
+    textObjects[0].set({ text: "{col1}" });
+    if (textObjects[0] instanceof TextboxExt) {
+      textObjects[0].set({ fontAutoSize: true });
+    }
+  };
   let page = $state<number>(0);
   let pagesTotal = $state<number>(1);
   let batchPreviewMode = $state<"grid" | "row" | "column">("grid");
@@ -324,6 +344,7 @@
     fabricTempCanvas.setLabelProps(labelProps);
 
     await fabricTempCanvas.loadFromJSON(canvasCallback());
+    applyCsvSingleValueFallback(fabricTempCanvas);
 
     let variables = {};
 
