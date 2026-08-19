@@ -46,9 +46,28 @@ export const detectCsvHasHeader = (data: string, delimiter?: string): boolean =>
   return firstRow.length > 0 && firstRow.every((cell) => CSV_IDENTIFIER_RX.test(cell));
 };
 
-export const parseCsvData = (data: string, delimiter?: string, hasHeader: boolean = true): DSVRowArray<string> => {
+export const parseCsvData = (
+  data: string,
+  delimiter?: string,
+  hasHeader: boolean = true,
+  oneItemPerCell: boolean = false,
+): DSVRowArray<string> => {
   const parser = dsvFormat(normalizeCsvDelimiter(delimiter));
   const normalizedData = normalizeCsvData(data);
+
+  if (oneItemPerCell) {
+    const rows = parser
+      .parseRows(normalizedData, (row) => row.map(cleanCsvCell))
+      .flat()
+      .filter((cell) => cell !== "");
+    const normalized: DSVRowArray<string> = Object.assign([], { columns: ["col1", "name"] });
+
+    for (const cell of rows) {
+      normalized.push({ col1: cell, name: cell });
+    }
+
+    return normalized;
+  }
 
   if (!hasHeader) {
     const rows = parser.parseRows(normalizedData, (row) => row.map(cleanCsvCell)).filter((row) => row.length > 0);

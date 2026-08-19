@@ -22,6 +22,7 @@ export const CsvParamsSchema = z.object({
   data: z.string(),
   delimiter: z.string().optional(),
   hasHeader: z.boolean().optional(),
+  oneItemPerCell: z.boolean().optional(),
 });
 
 /** Not validated */

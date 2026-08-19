@@ -20,7 +20,7 @@
   let pickedFileName = $state<string>("");
 
   const parse = (csv: CsvParams) => {
-    const result = parseCsvData(csv.data, csv.delimiter, csv.hasHeader ?? true);
+    const result = parseCsvData(csv.data, csv.delimiter, csv.hasHeader ?? true, csv.oneItemPerCell ?? false);
     placeholders = result.columns;
     rows = result.length;
   };
@@ -38,8 +38,15 @@
   const setHasHeader = (value: boolean) => {
     $csvData.hasHeader = value;
     enabled = true;
-    const result = parseCsvData($csvData.data, $csvData.delimiter, value);
+    const result = parseCsvData($csvData.data, $csvData.delimiter, value, $csvData.oneItemPerCell ?? false);
     onDataLoaded?.(result.columns, value);
+  };
+
+  const setOneItemPerCell = (value: boolean) => {
+    $csvData.oneItemPerCell = value;
+    enabled = true;
+    const result = parseCsvData($csvData.data, $csvData.delimiter, $csvData.hasHeader ?? true, value);
+    onDataLoaded?.(result.columns, false);
   };
 
   const loadCsvFile = async () => {
@@ -48,7 +55,12 @@
       const file = files[0];
       $csvData.data = await file.text();
       $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
-      const result = parseCsvData($csvData.data, $csvData.delimiter, $csvData.hasHeader);
+      const result = parseCsvData(
+        $csvData.data,
+        $csvData.delimiter,
+        $csvData.hasHeader,
+        $csvData.oneItemPerCell ?? false,
+      );
       pickedFileName = file.name;
       enabled = true;
       onDataLoaded?.(result.columns, $csvData.hasHeader);
@@ -112,6 +124,17 @@
           checked={$csvData.hasHeader ?? true}
           onchange={(e) => setHasHeader(e.currentTarget.checked)} />
         <label class="form-check-label" for="csv-has-header">First row contains column names</label>
+      </div>
+
+      <div class="form-check form-switch mt-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          role="switch"
+          id="csv-one-item-per-cell"
+          checked={$csvData.oneItemPerCell ?? false}
+          onchange={(e) => setOneItemPerCell(e.currentTarget.checked)} />
+        <label class="form-check-label" for="csv-one-item-per-cell">Separated values are individual labels</label>
       </div>
 
       <textarea class="dsv form-control my-3" bind:value={$csvData.data} oninput={() => (enabled = true)}></textarea>

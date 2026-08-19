@@ -33,6 +33,7 @@
     csvData: string;
     csvDelimiter?: string;
     csvHasHeader?: boolean;
+    csvOneItemPerCell?: boolean;
     csvEnabled: boolean;
     show: boolean;
   }
@@ -44,6 +45,7 @@
     csvData,
     csvDelimiter,
     csvHasHeader,
+    csvOneItemPerCell,
     csvEnabled,
     show = $bindable(),
   }: Props = $props();
@@ -397,7 +399,7 @@
 
   onMount(async () => {
     if (csvEnabled) {
-      const parseResult = parseCsvData(csvData, csvDelimiter, csvHasHeader ?? true);
+      const parseResult = parseCsvData(csvData, csvDelimiter, csvHasHeader ?? true, csvOneItemPerCell ?? false);
       const spread: DSVRowArray<string> = Object.assign([], { columns: parseResult.columns });
 
       for (let row of parseResult) {

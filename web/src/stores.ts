@@ -49,6 +49,7 @@ export const csvData = writablePersisted<CsvParams>("csv_params", CsvParamsSchem
   data: CSV_DEFAULT,
   delimiter: CSV_DEFAULT_DELIMITER,
   hasHeader: true,
+  oneItemPerCell: false,
 });
 
 userFonts.subscribe(FileUtils.loadFonts);

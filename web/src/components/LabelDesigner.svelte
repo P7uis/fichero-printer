@@ -265,7 +265,7 @@
   };
 
   const onCsvDataLoaded = (placeholders: string[], hasHeader: boolean) => {
-    if (hasHeader || !placeholders.includes("name") || !placeholders.includes("class")) {
+    if (hasHeader || !placeholders.includes("name")) {
       return;
     }
 
@@ -275,7 +275,7 @@
       return;
     }
 
-    applyCsvTextTemplate("{name}\n{class}", defaultText);
+    applyCsvTextTemplate(placeholders.includes("class") ? "{name}\n{class}" : "{name}", defaultText);
     undo.push(fabricCanvas!, labelProps);
   };
 
@@ -596,7 +596,8 @@
       {csvEnabled}
       csvData={$csvData.data}
       csvDelimiter={$csvData.delimiter}
-      csvHasHeader={$csvData.hasHeader} />
+      csvHasHeader={$csvData.hasHeader}
+      csvOneItemPerCell={$csvData.oneItemPerCell} />
   {/if}
 </div>
 
