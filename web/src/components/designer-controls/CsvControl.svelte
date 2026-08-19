@@ -5,7 +5,7 @@
   import { csvData } from "$/stores";
   import { FileUtils } from "$/utils/file_utils";
   import { Toasts } from "$/utils/toasts";
-  import { CSV_DEFAULT_DELIMITER, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
+  import { CSV_DEFAULT_DELIMITER, detectCsvHasHeader, normalizeCsvDelimiter, parseCsvData } from "$/utils/csv";
 
   interface Props {
     enabled: boolean;
@@ -44,6 +44,7 @@
       const files = await FileUtils.pickFileAsync("csv", false);
       const file = files[0];
       $csvData.data = await file.text();
+      $csvData.hasHeader = detectCsvHasHeader($csvData.data, $csvData.delimiter);
       pickedFileName = file.name;
       enabled = true;
     } catch (e) {

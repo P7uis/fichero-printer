@@ -2,6 +2,7 @@ import { dsvFormat, type DSVRowArray } from "d3-dsv";
 
 export const CSV_DEFAULT_DELIMITER = ",";
 export const CSV_HEADERLESS_ALIASES = ["name", "class"];
+const CSV_IDENTIFIER_RX = /^\$?\w+$/;
 
 export const normalizeCsvDelimiter = (delimiter?: string): string => {
   if (delimiter === undefined || delimiter === "") {
@@ -24,14 +25,33 @@ export const cleanCsvCell = (value: string): string => {
     return trimmed.slice(1, -1).replaceAll(`${first}${first}`, first);
   }
 
-  return trimmed;
+  return trimmed.replace(/^["']+|["']+$/g, "");
+};
+
+export const normalizeCsvData = (data: string): string => {
+  return data
+    .split(/\r?\n/)
+    .filter((line) => {
+      const trimmed = line.trim();
+      return trimmed !== "\"" && trimmed !== "'";
+    })
+    .join("\n");
+};
+
+export const detectCsvHasHeader = (data: string, delimiter?: string): boolean => {
+  const parser = dsvFormat(normalizeCsvDelimiter(delimiter));
+  const rows = parser.parseRows(normalizeCsvData(data), (row) => row.map(cleanCsvCell)).filter((row) => row.length > 0);
+  const firstRow = rows[0] ?? [];
+
+  return firstRow.length > 0 && firstRow.every((cell) => CSV_IDENTIFIER_RX.test(cell));
 };
 
 export const parseCsvData = (data: string, delimiter?: string, hasHeader: boolean = true): DSVRowArray<string> => {
   const parser = dsvFormat(normalizeCsvDelimiter(delimiter));
+  const normalizedData = normalizeCsvData(data);
 
   if (!hasHeader) {
-    const rows = parser.parseRows(data, (row) => row.map(cleanCsvCell)).filter((row) => row.length > 0);
+    const rows = parser.parseRows(normalizedData, (row) => row.map(cleanCsvCell)).filter((row) => row.length > 0);
     const columnCount = Math.max(0, ...rows.map((row) => row.length));
     const columns = Array.from({ length: columnCount }, (_, index) => `col${index + 1}`);
     const aliases = CSV_HEADERLESS_ALIASES.slice(0, columnCount);
@@ -54,7 +74,7 @@ export const parseCsvData = (data: string, delimiter?: string, hasHeader: boolea
     return normalized;
   }
 
-  const parsed = parser.parse(data);
+  const parsed = parser.parse(normalizedData);
   const columns = parsed.columns.map(cleanCsvCell);
   const normalized: DSVRowArray<string> = Object.assign([], { columns });
 
