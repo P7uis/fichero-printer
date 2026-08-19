@@ -222,9 +222,12 @@
 
   const onCsvPlaceholderPicked = (name: string) => {
     const obj = LabelDesignerObjectHelper.addText(fabricCanvas!, `{${name}}`, {
-      textAlign: "left",
+      width: Math.max(2, labelProps.size.width - 12),
+      fontAutoSize: true,
+      fontSize: Math.max(24, Math.floor(labelProps.size.height * 0.75)),
+      textAlign: "center",
       originX: "left",
-      originY: "top",
+      originY: "center",
     });
     fabricCanvas!.setActiveObject(obj);
     undo.push(fabricCanvas!, labelProps);

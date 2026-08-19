@@ -37,18 +37,27 @@ export class TextboxExt<
   }
 
   /** Set text and reduce fontSize until text fits to the given width */
-  setAndShrinkText(text: string, maxWidth: number, maxLines?: number) {
+  setAndShrinkText(text: string, maxWidth: number, maxLines?: number, maxHeight: number = Infinity) {
+    this.setAndFitText(text, maxWidth, maxHeight, maxLines, this.fontSize);
+  }
+
+  /** Set text as large as possible, bounded by the current font size and box size */
+  setAndFitText(text: string, maxWidth: number, maxHeight: number, maxLines?: number, maxFontSize?: number) {
     const linesLimit = maxLines ?? this._splitTextIntoLines(this.text).lines.length;
+    const upperFontSize = Math.max(2, Math.floor(maxFontSize ?? this.fontSize));
+    let bestFontSize = 2;
 
-    let linesCount = this._splitTextIntoLines(text).lines.length;
+    for (let nextFontSize = upperFontSize; nextFontSize >= 2; nextFontSize--) {
+      this.set({ text, width: maxWidth, fontSize: nextFontSize });
 
-    this.set({ text });
-
-    while ((linesCount > linesLimit || this.width > maxWidth) && this.fontSize > 2) {
-      this.fontSize -= 1;
-      this.set({ text, width: maxWidth });
-      linesCount = this._splitTextIntoLines(text).lines.length;
+      const linesCount = this._splitTextIntoLines(text).lines.length;
+      if (linesCount <= linesLimit && this.height <= maxHeight) {
+        bestFontSize = nextFontSize;
+        break;
+      }
     }
+
+    this.set({ text, width: maxWidth, fontSize: bestFontSize });
   }
 
   /** Reduce fontSize until text fits to the given width */

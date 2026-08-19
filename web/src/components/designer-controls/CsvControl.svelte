@@ -4,6 +4,8 @@
   import MdIcon from "$/components/basic/MdIcon.svelte";
   import { type CsvParams } from "$/types";
   import { csvData } from "$/stores";
+  import { FileUtils } from "$/utils/file_utils";
+  import { Toasts } from "$/utils/toasts";
 
   interface Props {
     enabled: boolean;
@@ -14,11 +16,24 @@
 
   let placeholders = $state<string[]>([]);
   let rows = $state<number>(0);
+  let pickedFileName = $state<string>("");
 
   const parse = (csv: CsvParams) => {
     const result = csvParse(csv.data);
     placeholders = result.columns;
     rows = result.length;
+  };
+
+  const loadCsvFile = async () => {
+    try {
+      const files = await FileUtils.pickFileAsync("csv", false);
+      const file = files[0];
+      $csvData.data = await file.text();
+      pickedFileName = file.name;
+      enabled = true;
+    } catch (e) {
+      Toasts.error(e);
+    }
   };
 
   $effect(() => {
@@ -45,6 +60,14 @@
       <div class="mt-3">
         {$tr("params.csv.tip")}
       </div>
+
+      <button class="btn btn-sm btn-outline-secondary mt-3" type="button" onclick={loadCsvFile}>
+        <MdIcon icon="upload_file" />
+        Load CSV file
+      </button>
+      {#if pickedFileName}
+        <div class="small text-body-secondary mt-1">{pickedFileName}</div>
+      {/if}
 
       <textarea class="dsv form-control my-3" bind:value={$csvData.data} oninput={() => (enabled = true)}></textarea>
 
